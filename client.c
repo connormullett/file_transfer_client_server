@@ -42,12 +42,10 @@ int main(int argc, char* argv[]) {
   if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
     err_n_die("connection failed");
 
-  for(;;) {
-    request_body = "0\ttest_file";
-    send(sock, request_body, strlen(request_body), 0);
-    valread = read(sock, buffer, 1024);
-    printf("%s\n", buffer);
-  }
+  request_body = "test_file\n";
+  send(sock, request_body, strlen(request_body), 0);
+  valread = read(sock, buffer, 1024);
+  printf("%s\n", buffer);
 
   close(sock);
 

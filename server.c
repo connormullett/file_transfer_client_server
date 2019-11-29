@@ -9,8 +9,8 @@ int main(int argc, char** argv) {
   struct sockaddr_in servaddr;
   uint8_t buff[MAXLINE+1];
   uint8_t recvline[MAXLINE+1];
-  char* client_message;
-  char request_delim[] = "\t";
+  char* filename;
+  int fd;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
@@ -36,9 +36,7 @@ int main(int argc, char** argv) {
     memset(recvline, 0, MAXLINE);
 
     while( (n = read(connfd, recvline, MAXLINE-1)) > 0) {
-      request_type = recvline[0];
-      client_message = (char*)recvline;
-      printf("message recieved :: %s\n", client_message);
+      filename = (char*)recvline;
       if (recvline[n-1] == '\n')
         break;
       memset(recvline, 0, MAXLINE);
@@ -47,8 +45,22 @@ int main(int argc, char** argv) {
     if (n < 0)
       err_n_die("read error");
 
-    snprintf((char*)buff, sizeof(buff), "HTTP/1.0 200 OK\r\n\r\nHello");
+    // open file for reading
+    fd = open(filename, O_RDONLY); // TODO: need error checking
 
+    // get filesize from request
+    struct stat st;
+    fstat(fd, &st);
+    int file_size = st.st_size;
+
+    // read file
+    read(fd, buff, file_size);
+    printf("%s\n", buff);
+
+    // close file
+    close(fd);
+
+    // write to connection socket and close
     write(connfd, (char*)buff, strlen((char*)buff));
     close(connfd);
   }
