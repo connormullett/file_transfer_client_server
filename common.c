@@ -53,3 +53,20 @@ void send_error_response(int fd) {
 }
 
 
+char* read_file(uint8_t* buff, const char* filename, int* fd) {
+  struct stat st;
+  int file_size;
+
+  // get file's size
+  fstat(*fd, &st);
+  file_size = st.st_size;
+
+  // read file
+  read(*fd, buff, file_size);
+
+  // close file
+  close(*fd);
+
+  return (char*)buff;
+}
+

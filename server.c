@@ -12,7 +12,6 @@ int main(int argc, char** argv) {
   char* filename;
   int fd;
   int servaddr_len = sizeof(servaddr);
-  struct stat st;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
@@ -60,20 +59,12 @@ int main(int argc, char** argv) {
     if (fd < 0) {
       printf("no such file :: %s\n", filename);
       send_error_response(connfd);
+    } else {
+      char* file_content = read_file(buff, filename, &fd);
+      printf("content :: %s\n", file_content);
+      write(connfd, file_content, strlen(file_content));
     }
 
-    // get filesize from request
-    fstat(fd, &st);
-    int file_size = st.st_size;
-
-    // read file
-    read(fd, buff, file_size);
-
-    // close file
-    close(fd);
-
-    // write to connection socket and close
-    write(connfd, (char*)buff, strlen((char*)buff));
     close(connfd);
   }
 }
