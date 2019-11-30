@@ -8,6 +8,7 @@
 #include "common.h"
 
 #define PORT 9001
+#define MAX_BUFF 32
 
 int main(int argc, char* argv[]) {
   int sock = 0, valread;
@@ -17,6 +18,27 @@ int main(int argc, char* argv[]) {
   char buffer[1024] = {0};
   char* host;
   int request_type;
+
+  char* input = (char*)malloc(sizeof(char) * MAX_BUFF);
+
+  printf("enter filename :: ");
+  scanf("%s", input);
+
+  if(input == NULL) {
+    free(input);
+    err_n_die("input error");
+  }
+
+  int len = strlen(input);
+
+  while (len + 1 >= MAX_BUFF) {
+    input = (char*)realloc(input, MAX_BUFF);
+  }
+
+  input[len] = '\n';
+  input[len + 1] = '\0';
+  request_body = input;
+  free(input);
 
   if (argc > 1) {
     if (strncmp("local", argv[1], 5) == 0) {
@@ -42,7 +64,7 @@ int main(int argc, char* argv[]) {
   if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
     err_n_die("connection failed");
 
-  request_body = "test_file\n";
+  printf("file name :: %s", request_body);
   send(sock, request_body, strlen(request_body), 0);
   valread = read(sock, buffer, 1024);
   printf("%s\n", buffer);
