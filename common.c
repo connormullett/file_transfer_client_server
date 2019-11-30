@@ -44,3 +44,12 @@ char* bin2hex(const unsigned char* input, size_t len) {
   return result;
 }
 
+
+void send_error_response(int fd) {
+  char* response = "-1";
+
+  write(fd, response, strlen(response));
+  err_n_die("file opening error");
+}
+
+

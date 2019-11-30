@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
   uint8_t recvline[MAXLINE+1];
   char* filename;
   int fd;
+  int servaddr_len = sizeof(servaddr);
+  struct stat st;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
@@ -31,7 +33,9 @@ int main(int argc, char** argv) {
     socklen_t addr_len;
     printf("waiting for connection on port %d\n", SERVER_PORT);
     fflush(stdout);
-    connfd = accept(listenfd, (SA*) NULL, NULL);
+    connfd = accept(listenfd, (SA*)&servaddr, (socklen_t*)&servaddr_len);
+    printf("Connection Recieved :: host %s\n",
+        inet_ntoa(servaddr.sin_addr));
 
     memset(recvline, 0, MAXLINE);
 
@@ -42,20 +46,28 @@ int main(int argc, char** argv) {
       memset(recvline, 0, MAXLINE);
     }
 
+    filename[n - 1] = '\0';
+    printf("requesting file %s from %s\n",
+        filename,
+        inet_ntoa(servaddr.sin_addr));
+
     if (n < 0)
       err_n_die("read error");
 
     // open file for reading
     fd = open(filename, O_RDONLY); // TODO: need error checking
 
+    if (fd < 0) {
+      printf("no such file :: %s\n", filename);
+      send_error_response(connfd);
+    }
+
     // get filesize from request
-    struct stat st;
     fstat(fd, &st);
     int file_size = st.st_size;
 
     // read file
     read(fd, buff, file_size);
-    printf("%s\n", buff);
 
     // close file
     close(fd);
