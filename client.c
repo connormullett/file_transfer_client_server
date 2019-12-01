@@ -17,21 +17,38 @@ int main(int argc, char* argv[]) {
   char* request_body;
   char buffer[1024] = {0};
   char* host;
-  int request_type;
+  int operation;
+  int file_len;
 
+  char* file_in = (char*)malloc(sizeof(char) * MAX_BUFF);
   char* input = (char*)malloc(sizeof(char) * MAX_BUFF);
+
+  printf("enter operation\n0 :: WRITE\n1 :: READ\n");
+  scanf("%d", operation);
+
+  if (operation < 0 || operation > 1) {
+    err_n_die("operation error, invalid");
+  }
 
   printf("enter filename :: ");
   scanf("%s", input);
 
-  if(input == NULL) {
-    free(input);
-    err_n_die("input error");
+  if (operation == WRITE) {
+    printf("Enter file to send to server :: ");
+    scanf("%s", file_in);
   }
 
-  int len = strlen(input);
+  if (input == NULL || file_in == NULL) {
+    free(input);
+    free(file_in);
+    err_n_die("input error");
+  }
+  
+  int input_len = strlen(input);
+  if(file_in) 
+    file_len = strlen(file_in);
 
-  while (len + 1 >= MAX_BUFF) {
+  while (input_len + 1 >= MAX_BUFF) {
     input = (char*)realloc(input, MAX_BUFF);
   }
 

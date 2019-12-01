@@ -53,6 +53,13 @@ void send_error_response(int fd) {
 }
 
 
+void send_success_response(int fd) {
+  char* response = "0";
+
+  write(fd, response, strlen(response));
+}
+
+
 char* read_file(uint8_t* buff, const char* filename, int* fd) {
   struct stat st;
   int file_size;
@@ -161,5 +168,36 @@ char* request_to_str(struct request* request) {
   }
 
   return request_str;
+}
+
+
+char** split_line(char* input) {
+  int bufsize = 64;
+  int position = 0;
+  char** tokens = malloc(bufsize * sizeof(char*));
+  char* token;
+  char delim[] = "\n";
+
+  if(!tokens) {
+    err_n_die("allocation error in split_line\n");
+  }
+
+  token = strtok(input, delim);
+  while (token != NULL) {
+    tokens[position] = token;
+    position++;
+
+    if (position >= bufsize) {
+      bufsize += bufsize;
+      tokens = realloc(tokens, bufsize * sizeof(char*));
+      if (!tokens)
+        err_n_die("allocation error in split_line\n");
+    }
+
+    token = strtok(NULL, delim);
+  }
+
+  tokens[position] = NULL;
+  return tokens;
 }
 

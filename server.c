@@ -9,10 +9,11 @@ int main(int argc, char** argv) {
   struct sockaddr_in servaddr;
   uint8_t buff[MAXLINE+1];
   uint8_t recvline[MAXLINE+1];
-  char* filename;
   int fd;
   int servaddr_len = sizeof(servaddr);
-  char* inc_request;
+  char* filename;
+  char** args;
+  struct request* request;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
@@ -35,37 +36,47 @@ int main(int argc, char** argv) {
     fflush(stdout);
     connfd = accept(listenfd, (SA*)&servaddr, (socklen_t*)&servaddr_len);
     printf("Connection Recieved :: host %s\n",
-        inet_ntoa(servaddr.sin_addr));
+      inet_ntoa(servaddr.sin_addr));
 
     memset(recvline, 0, MAXLINE);
 
+    // read from connection socket
     n = read(connfd, recvline, MAXLINE-1);
-    filename = (char*)recvline;
-    printf("bytes read (n) :: %d\n", n);
-    printf("request :: %s\n", filename);
-
-    printf("requesting file %s from %s\n",
-        filename,
-        inet_ntoa(servaddr.sin_addr));
-
     if (n < 0)
       err_n_die("read error");
 
-    // open file for reading
-    fd = open(filename, O_RDONLY); // TODO: need error checking
+    // parse args from read buffer
+    args = split_line((char*)recvline);
+    request = parse_request(args);
 
-    if (fd < 0) {
-      printf("no such file :: %s\n", filename);
-      send_error_response(connfd);
+    // log request
+    printf("requesting file %s from %s\n",
+      request->filename,
+      inet_ntoa(servaddr.sin_addr));
+
+    // check if operation is for read or write
+    if (request->operation == READ) {
+      // open file for reading
+      fd = open(request->filename, O_RDONLY);
+
+      if (fd < 0) {
+        printf("no such file :: %s\n", request->filename);
+        send_error_response(connfd);
+      } else {
+        char* file_content = read_file(buff, filename, &fd);
+        write(connfd, file_content, strlen(file_content));
+      }
+    } else if (request->operation == WRITE){
+      fd = open(request->filename, O_CREAT);
+      write(fd, request->content, request->len_content);
+      send_success_response(connfd);
     } else {
-      char* file_content = read_file(buff, filename, &fd);
-      printf("content :: %s\n", file_content);
-      write(connfd, file_content, strlen(file_content));
+      // invalid operation
+      // TODO: fix for using response struct
+      send_error_response(connfd);
     }
 
     close(connfd);
   }
-
-  close(listenfd);
 }
 

@@ -44,6 +44,7 @@ struct request {
 void err_n_die(const char* fmt, ...);
 char* bin2hex(const unsigned char* input, size_t len);
 
+void send_success_response(int fd);
 void send_error_response(int fd);
 char* read_file(uint8_t* buff, const char* filename, int* fd);
 
@@ -55,6 +56,8 @@ struct request* parse_request(char** args);
 struct request* create_request(int operation, int len_filename, int len_content,
     char* filename, char* content);
 char* request_to_str(struct request* request);
+
+char** split_line(char* input);
 
 #endif
 
