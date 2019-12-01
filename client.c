@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     host = "127.0.0.1";
   }
 
-  char* request_str = request_to_str(request);
+  char* request_str = request_to_str(*request);
 
   // create socket
   printf("using host :: %s on port %d\n", host, PORT);

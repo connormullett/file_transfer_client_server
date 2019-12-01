@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         printf("no such file :: %s\n", request->filename);
         send_error_response(connfd);
       } else {
-        char* file_content = read_file(buff, filename, &fd);
+        char* file_content = read_file(buff, request->filename, &fd);
         write(connfd, file_content, strlen(file_content));
       }
     } else if (request->operation == WRITE){

@@ -149,25 +149,25 @@ struct request* create_request(int operation, int len_filename, int len_content,
 }
 
 
-char* request_to_str(struct request* request) {
+char* request_to_str(struct request request) {
   size_t len = 0;
-  len = snprintf(NULL, len, "%d\n%d\n%d\n%s\n%s\n", request->operation,
-      request->len_filename, request->len_content, request->filename,
-      request->content);
 
-  char *request_str = calloc(1, sizeof(*request_str) * len + 1);
+  len = snprintf(NULL, len, "%d\n%d\n%d\n%s\n%s\n", request.operation,
+      request.len_filename, request.len_content, request.filename,
+      request.content);
+
+  char *request_str = calloc(1, sizeof *request_str  * len + 1);
   if (!request_str) {
     fprintf(stderr, "%s() error: memory allocation failed\n", __func__);
+    err_n_die("struct parse error");
   }
 
-  if (snprintf(request_str, len + 1, "%d\n%d\n%d\n%s\n%s\n", request->operation,
-      request->len_filename, request->len_content, request->filename,
-      request->content)) {
+  if (snprintf(request_str, len + 1, "%d\n%d\n%d\n%s\n%s\n", request.operation,
+      request.len_filename, request.len_content, request.filename,
+      request.content) > len + 1) {
     fprintf (stderr, "%s()  error: snprintf truncated result\n", __func__);
-    return NULL;
+    err_n_die("struct parse error");
   }
-
-  return request_str;
 }
 
 

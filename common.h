@@ -55,7 +55,7 @@ char* response_to_str(struct response* response);
 struct request* parse_request(char** args);
 struct request* create_request(int operation, int len_filename, int len_content,
     char* filename, char* content);
-char* request_to_str(struct request* request);
+char* request_to_str(struct request request);
 
 char** split_line(char* input);
 
