@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
   char* filename;
   int fd;
   int servaddr_len = sizeof(servaddr);
+  char* inc_request;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
@@ -38,14 +39,11 @@ int main(int argc, char** argv) {
 
     memset(recvline, 0, MAXLINE);
 
-    while( (n = read(connfd, recvline, MAXLINE-1)) > 0) {
-      filename = (char*)recvline;
-      if (recvline[n-1] == '\n')
-        break;
-      memset(recvline, 0, MAXLINE);
-    }
+    n = read(connfd, recvline, MAXLINE-1);
+    filename = (char*)recvline;
+    printf("bytes read (n) :: %d\n", n);
+    printf("request :: %s\n", filename);
 
-    filename[n - 1] = '\0';
     printf("requesting file %s from %s\n",
         filename,
         inet_ntoa(servaddr.sin_addr));
@@ -67,5 +65,7 @@ int main(int argc, char** argv) {
 
     close(connfd);
   }
+
+  close(listenfd);
 }
 

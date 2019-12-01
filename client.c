@@ -35,10 +35,7 @@ int main(int argc, char* argv[]) {
     input = (char*)realloc(input, MAX_BUFF);
   }
 
-  input[len] = '\n';
-  input[len + 1] = '\0';
   request_body = input;
-  free(input);
 
   if (argc > 1) {
     if (strncmp("local", argv[1], 5) == 0) {
@@ -64,7 +61,6 @@ int main(int argc, char* argv[]) {
   if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
     err_n_die("connection failed");
 
-  printf("file name :: %s", request_body);
   send(sock, request_body, strlen(request_body), 0);
   valread = read(sock, buffer, 1024);
   printf("%s\n", buffer);
