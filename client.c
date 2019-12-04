@@ -15,13 +15,22 @@ int main(int argc, char* argv[]) {
   struct sockaddr_in serv_addr;
   char file_name[MAXLINE+1];
   char buffer[1024] = {0};
-  char* host;
   int operation;
   struct request* request;
   int fd;
   char* file_in_content;
   uint8_t buff[MAXLINE+1];
 
+  // usage check
+  if (argc != 3) {
+    printf("usage %s <host> <port number>", __FILE__);
+    exit(EXIT_FAILURE);
+  }
+
+  char* host = argv[1];
+  int port = atoi(argv[2]);
+
+  // this is a lot of heap allocation, fix
   char* file_in = (char*)malloc(sizeof(char) * MAX_BUFF);
   char* input = (char*)malloc(sizeof(char) * MAX_BUFF);
 
@@ -60,27 +69,16 @@ int main(int argc, char* argv[]) {
     err_n_die("input error");
   }
 
-  // usage check
-  if (argc > 1) {
-    if (strncmp("local", argv[1], 5) == 0) {
-      host = "127.0.0.1";
-    } else {
-      host = argv[1];
-    }
-  } else {
-    host = "127.0.0.1";
-  }
-
   char* request_str = request_to_str(*request);
 
   // create socket
-  printf("using host :: %s on port %d\n", host, PORT);
+  printf("using host :: %s on port %d\n", host, port);
   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("creation error");
 
   // create socket information
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(PORT);
+  serv_addr.sin_port = htons(port);
 
   if(inet_pton(AF_INET, host, &serv_addr.sin_addr) <= 0)
     err_n_die("address assignment error");

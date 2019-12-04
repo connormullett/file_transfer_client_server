@@ -25,13 +25,23 @@ int main(int argc, char** argv) {
   // handle sigint
   signal(SIGINT, interrupt_handler);
 
+  // usage check
+  if (argc != 3) {
+    printf("usage %s <host> <port number>", __FILE__);
+    exit(EXIT_FAILURE);
+  }
+
+  char* host = argv[1];
+  int port = atoi(argv[2]);
+
+  // create socket for listening
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
 
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(SERVER_PORT);
+  servaddr.sin_port = htons(port);
 
   if ((bind(listenfd, (SA*)&servaddr, sizeof(servaddr))) < 0)
     err_n_die("bind error");
@@ -42,7 +52,7 @@ int main(int argc, char** argv) {
   for( ; ; ) {
     struct sockaddr_in addr;
     socklen_t addr_len;
-    printf("waiting for connection on port %d\n", SERVER_PORT);
+    printf("waiting for connection on port %d\n", port);
     fflush(stdout);
     connfd = accept(listenfd, (SA*)&servaddr, (socklen_t*)&servaddr_len);
     printf("Connection Recieved :: host %s\n",

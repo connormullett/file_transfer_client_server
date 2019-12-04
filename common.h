@@ -19,8 +19,6 @@
 #include <sys/ioctl.h>
 #include <netdb.h>
 
-#define SERVER_PORT 9001
-
 #define MAXLINE 4096
 #define SA struct sockaddr
 
