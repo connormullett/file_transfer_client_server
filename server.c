@@ -2,9 +2,16 @@
 #include "common.h"
 #include <strings.h>
 
+int listenfd;
+
+void interrupt_handler(int num){
+  close(listenfd);
+  err_n_die("recieved SIGINT\n");
+}
+
 
 int main(int argc, char** argv) {
-  int listenfd, connfd, n, request_type;
+  int connfd, n, request_type;
   unsigned int recieved_length;
   struct sockaddr_in servaddr;
   uint8_t buff[MAXLINE+1];
@@ -14,6 +21,9 @@ int main(int argc, char** argv) {
   char* filename;
   char** args;
   struct request* request;
+
+  // handle sigint
+  signal(SIGINT, interrupt_handler);
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     err_n_die("socket error");
