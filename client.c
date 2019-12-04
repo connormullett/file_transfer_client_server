@@ -55,12 +55,12 @@ int main(int argc, char* argv[]) {
     if (fd == -1)
       err_n_die("no such file");
     file_in_content = read_file(buff, input, &fd);
-    request = create_request(operation, strlen(input), 
+    request = create_request(operation, strlen(input),
         strlen(file_in_content), input, file_in_content);
   } else {
     request = create_request(operation, strlen(input),
         0, input, NULL);
-  } 
+  }
 
   // error check input and file_in
   if (input == NULL || file_in == NULL) {
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
   // send data
   send(sock, request_str, strlen(request_str), 0);
-  
+
   // read data
   valread = read(sock, buffer, 1024);
 

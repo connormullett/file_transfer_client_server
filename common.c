@@ -184,8 +184,7 @@ char** split_line(char* input) {
 
   token = strtok(input, delim);
   while (token != NULL) {
-    tokens[position] = token;
-    position++;
+    tokens[position++] = token;
 
     if (position >= bufsize) {
       bufsize += bufsize;
