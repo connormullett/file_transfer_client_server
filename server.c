@@ -6,7 +6,7 @@ int listenfd;
 
 void interrupt_handler(int num){
   close(listenfd);
-  err_n_die("recieved SIGINT\n");
+  err_n_die("\nrecieved SIGINT\n");
 }
 
 
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
   // usage check
   if (argc != 3) {
-    printf("usage %s <host> <port number>", __FILE__);
+    printf("usage %s <host> <port number>\n", __FILE__);
     exit(EXIT_FAILURE);
   }
 

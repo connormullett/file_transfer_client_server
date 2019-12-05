@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
   // usage check
   if (argc != 3) {
-    printf("usage %s <host> <port number>", __FILE__);
+    printf("usage %s <host> <port number>\n", __FILE__);
     exit(EXIT_FAILURE);
   }
 
