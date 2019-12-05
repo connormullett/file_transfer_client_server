@@ -121,12 +121,13 @@ char* response_to_str(struct response* response) {
 
 
 struct request* parse_request(char** args) {
-  int len_filename = atoi(args[1]);
-  char* filename = (char*)malloc((sizeof(char) * len_filename) + 1);
+  printf("%s\n", args[0]);
+  printf("%s\n", args[1]);
 
   struct request* out = (struct request*)malloc(sizeof(struct request));
-  out->len_filename = len_filename;
-  out->filename = filename;
+
+  out->len_filename = atoi(args[0]);
+  out->filename = args[1];
   return out;
 }
 
@@ -163,9 +164,8 @@ char* request_to_str(struct request request) {
 
 
 char** split_line(char* input) {
-  int bufsize = 64;
   int position = 0;
-  char** tokens = malloc(bufsize * sizeof(char*));
+  char** tokens = malloc(2 * sizeof(char*));
   char* token;
   char delim[] = "\n";
 
@@ -178,17 +178,9 @@ char** split_line(char* input) {
     tokens[position] = token;
     position++;
 
-    if (position >= bufsize) {
-      bufsize += bufsize;
-      tokens = realloc(tokens, bufsize * sizeof(char*));
-      if (!tokens)
-        err_n_die("allocation error in split_line\n");
-    }
-
     token = strtok(NULL, delim);
   }
 
-  tokens[position] = NULL;
   return tokens;
 }
 
