@@ -32,11 +32,8 @@ struct response {
 };
 
 struct request {
-  int operation;
   int len_filename;
-  int len_content;
   char* filename;
-  char* content;
 };
 
 void err_n_die(const char* fmt, ...);
@@ -51,8 +48,7 @@ struct response* create_response(int status, int body_length, char* body);
 char* response_to_str(struct response* response);
 
 struct request* parse_request(char** args);
-struct request* create_request(int operation, int len_filename, int len_content,
-    char* filename, char* content);
+struct request* create_request(int len_filename, char* filename);
 char* request_to_str(struct request request);
 
 char** split_line(char* input);

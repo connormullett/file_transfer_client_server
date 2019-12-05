@@ -15,11 +15,8 @@ int main(int argc, char* argv[]) {
   struct sockaddr_in serv_addr;
   char file_name[MAXLINE+1];
   char buffer[1024] = {0};
-  int operation;
   struct request* request;
   int fd;
-  char* file_in_content;
-  uint8_t buff[MAXLINE+1];
 
   // usage check
   if (argc != 3) {
@@ -34,33 +31,10 @@ int main(int argc, char* argv[]) {
   char* file_in = (char*)malloc(sizeof(char) * MAX_BUFF);
   char* input = (char*)malloc(sizeof(char) * MAX_BUFF);
 
-  printf("enter operation\n0 :: WRITE\n1 :: READ\n");
-  scanf("%d", &operation);
-
-  if (operation < 0 || operation > 1) {
-    err_n_die("operation error, invalid");
-  }
-
   printf("enter filename :: ");
   scanf("%s", input);
 
-  if (operation == WRITE) {
-    printf("Enter file to send to server :: ");
-    scanf("%s", file_in);
-    if ((fd = open(file_in, O_RDONLY)) == -1)
-      err_n_die("no such file\n");
-
-    // read file specified to file_in_content
-    int fd = open(input, O_RDONLY);
-    if (fd == -1)
-      err_n_die("no such file");
-    file_in_content = read_file(buff, input, &fd);
-    request = create_request(operation, strlen(input),
-        strlen(file_in_content), input, file_in_content);
-  } else {
-    request = create_request(operation, strlen(input),
-        0, input, NULL);
-  }
+  request = create_request(strlen(input), input);
 
   // error check input and file_in
   if (input == NULL || file_in == NULL) {
@@ -88,6 +62,7 @@ int main(int argc, char* argv[]) {
     err_n_die("connection failed");
 
   // send data
+  printf("request_str :: %s\n", request_str);
   send(sock, request_str, strlen(request_str), 0);
 
   // read data
@@ -95,7 +70,7 @@ int main(int argc, char* argv[]) {
 
   // take response and parse to response struct
   char** args = split_line(buffer);
-  struct response* response = parse_response(args);
+  // struct response* response = parse_response(args);
 
   // close the socket when done
   close(sock);

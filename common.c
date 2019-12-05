@@ -121,30 +121,21 @@ char* response_to_str(struct response* response) {
 
 
 struct request* parse_request(char** args) {
-  int operation = atoi(args[0]);
   int len_filename = atoi(args[1]);
-  int len_content = atoi(args[2]);
   char* filename = (char*)malloc((sizeof(char) * len_filename) + 1);
-  char* content = (char*)malloc((sizeof(char) * len_content) + 1);
 
   struct request* out = (struct request*)malloc(sizeof(struct request));
-  out->operation = operation;
   out->len_filename = len_filename;
-  out->len_content = len_content;
   out->filename = filename;
-  out->content = content;
   return out;
 }
 
 
-struct request* create_request(int operation, int len_filename, int len_content,
-    char* filename, char* content) {
+struct request* create_request(int len_filename, char* filename) {
   struct request* out = (struct request*)malloc(sizeof(struct request));
-  out->operation = operation;
+  out->filename = (char*)malloc(sizeof(char) * len_filename + 1);
   out->len_filename = len_filename;
-  out->len_content = len_content;
   out->filename = filename;
-  out->content = content;
   return out;
 }
 
@@ -152,9 +143,8 @@ struct request* create_request(int operation, int len_filename, int len_content,
 char* request_to_str(struct request request) {
   size_t len = 0;
 
-  len = snprintf(NULL, len, "%d\n%d\n%d\n%s\n%s\n", request.operation,
-      request.len_filename, request.len_content, request.filename,
-      request.content);
+  len = snprintf(NULL, len, "%d\n%s\n",
+      request.len_filename, request.filename);
 
   char *request_str = calloc(1, sizeof *request_str  * len + 1);
   if (!request_str) {
@@ -162,12 +152,13 @@ char* request_to_str(struct request request) {
     err_n_die("struct parse error");
   }
 
-  if (snprintf(request_str, len + 1, "%d\n%d\n%d\n%s\n%s\n", request.operation,
-      request.len_filename, request.len_content, request.filename,
-      request.content) > len + 1) {
+  if (snprintf(request_str, len + 1, "%d\n%s\n",
+      request.len_filename, request.filename) > len + 1) {
     fprintf (stderr, "%s()  error: snprintf truncated result\n", __func__);
     err_n_die("struct parse error");
   }
+
+  return request_str;
 }
 
 
@@ -184,7 +175,8 @@ char** split_line(char* input) {
 
   token = strtok(input, delim);
   while (token != NULL) {
-    tokens[position++] = token;
+    tokens[position] = token;
+    position++;
 
     if (position >= bufsize) {
       bufsize += bufsize;

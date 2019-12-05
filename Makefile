@@ -1,29 +1,28 @@
 
-all: obj/server.o obj/client.o obj/common.o
-	gcc obj/server.o obj/common.o -o server
-	gcc obj/client.o obj/common.o -o client
+CC = gcc
+CFLAGS = -g -O2 -Wall
 
-server: obj/server.o obj/common.o
-	gcc obj/server.o obj/common.o -o server
+OBJDIR = obj
+OBJ_SERVER = $(OBJDIR)/common.o $(OBJDIR)/server.o
+OBJ_CLIENT = $(OBJDIR)/common.o $(OBJDIR)/client.o
 
-debug: obj/server.o obj/common.o
-	gcc -ggdb obj/server.o obj/common.o -o d_server
-	gcc -ggdb obj/client.o obj/common.o -o d_client
+all: client server
+.PHONY: all
 
-client: obj/client.o obj/common.o
-	gcc obj/client.o obj/common.o -o client
+$(OBJDIR):
+	@mkdir -p $@
 
-obj/common.o: common.c common.h
-	gcc -c common.c -o obj/common.o
+client: $(OBJ_CLIENT)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-obj/client.o: client.c
-	gcc -c client.c -o obj/client.o
+server: $(OBJ_SERVER)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-obj/server.o: server.c
-	gcc -c server.c -o obj/server.o
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm obj/*.o
-	rm server
-	rm client
+	rm -rf $(OBJDIR)
+	rm -f client server
+.PHONY: clean
 

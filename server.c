@@ -11,14 +11,12 @@ void interrupt_handler(int num){
 
 
 int main(int argc, char** argv) {
-  int connfd, n, request_type;
-  unsigned int recieved_length;
+  int connfd, n;
   struct sockaddr_in servaddr;
   uint8_t buff[MAXLINE+1];
   uint8_t recvline[MAXLINE+1];
   int fd;
   int servaddr_len = sizeof(servaddr);
-  char* filename;
   char** args;
   struct request* request;
 
@@ -50,9 +48,9 @@ int main(int argc, char** argv) {
     err_n_die("listen error");
 
   for( ; ; ) {
-    struct sockaddr_in addr;
-    socklen_t addr_len;
-    printf("waiting for connection on port %d\n", port);
+    // struct sockaddr_in addr;
+    // socklen_t addr_len;
+    printf("waiting for connection %s:%d\n", host, port);
     fflush(stdout);
     connfd = accept(listenfd, (SA*)&servaddr, (socklen_t*)&servaddr_len);
     printf("Connection Recieved :: host %s\n",
@@ -65,35 +63,29 @@ int main(int argc, char** argv) {
     if (n < 0)
       err_n_die("read error");
 
+    char* input = (char*)recvline;
+
     // parse args from read buffer
-    args = split_line((char*)recvline);
+    args = split_line(input);  // args is null
     request = parse_request(args);
+    printf("len_filename :: %d\n", request->len_filename);
+    printf("filename :: %s\n", request->filename);
+
 
     // log request
     printf("requesting file %s from %s\n",
       request->filename,
       inet_ntoa(servaddr.sin_addr));
 
-    // check if operation is for read or write
-    if (request->operation == READ) {
-      // open file for reading
-      fd = open(request->filename, O_RDONLY);
+    // open file for reading
+    fd = open(request->filename, O_RDONLY);
 
-      if (fd < 0) {
-        printf("no such file :: %s\n", request->filename);
-        send_error_response(connfd);
-      } else {
-        char* file_content = read_file(buff, request->filename, &fd);
-        write(connfd, file_content, strlen(file_content));
-      }
-    } else if (request->operation == WRITE){
-      fd = open(request->filename, O_CREAT);
-      write(fd, request->content, request->len_content);
-      send_success_response(connfd);
-    } else {
-      // invalid operation
-      // TODO: fix for using response struct
+    if (fd < 0) {
+      printf("no such file :: %s\n", request->filename);
       send_error_response(connfd);
+    } else {
+      char* file_content = read_file(buff, request->filename, &fd);
+      write(connfd, file_content, strlen(file_content));
     }
 
     close(connfd);
